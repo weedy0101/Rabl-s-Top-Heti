@@ -2,7 +2,7 @@
   "name": "rablas-heti-top",
   "version": "1.0.0",
   "private": true,
-  "description": "Rablás Heti Top – nyilvános toplista, jelszóval védett szerkesztéssel (Netlify Functions + Blobs)",
+  "description": "Rablás Heti Top – nyilvános toplista, bárki rögzíthet, törlés jelszóval (Netlify Functions + Blobs)",
   "type": "module",
   "engines": {
     "node": ">=22.12.0"

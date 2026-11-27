@@ -179,8 +179,8 @@
         <!-- FŐ TARTALOM -->
         <main class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-            <!-- BAL OSZLOP: ÚJ RABLÁS RÖGZÍTÉSE (csak adminnak látszik) -->
-            <section id="form-section" class="hidden lg:col-span-5 bg-dark-900/90 backdrop-blur-md border border-zinc-800/80 rounded-2xl p-6 shadow-xl">
+            <!-- BAL OSZLOP: ÚJ RABLÁS RÖGZÍTÉSE (mindenkinek látszik) -->
+            <section id="form-section" class="lg:col-span-5 bg-dark-900/90 backdrop-blur-md border border-zinc-800/80 rounded-2xl p-6 shadow-xl">
                 <div class="flex items-center gap-2.5 mb-5 pb-4 border-b border-zinc-800">
                     <i class="fa-solid fa-file-signature text-gold-400 text-lg"></i>
                     <h2 class="font-display text-2xl font-bold uppercase tracking-wide text-white">
@@ -295,7 +295,7 @@
             </section>
 
             <!-- JOBB OSZLOP: HETI TOPLISTA (mindenkinek látszik) -->
-            <section id="leaderboard-section" class="lg:col-span-12 bg-dark-900/90 backdrop-blur-md border border-zinc-800/80 rounded-2xl p-6 shadow-xl">
+            <section id="leaderboard-section" class="lg:col-span-7 bg-dark-900/90 backdrop-blur-md border border-zinc-800/80 rounded-2xl p-6 shadow-xl">
 
                 <div class="flex items-center justify-between gap-4 mb-6 pb-4 border-b border-zinc-800">
                     <div class="flex items-center gap-2.5">
@@ -347,7 +347,7 @@
 
     <!-- Lábléc -->
     <footer class="relative z-10 border-t border-zinc-900 py-5 mt-12 text-center text-xs text-zinc-500">
-        Rablás Heti Top &bull; Az eredményeket csak az admin rögzítheti.
+        Rablás Heti Top &bull; Bárki rögzíthet rablást, törölni csak az admin tud.
     </footer>
 
     <!-- JAVASCRIPT LOGIKA -->
@@ -508,9 +508,6 @@
 
         function setAdmin(on) {
             isAdmin = on;
-            formSection.classList.toggle('hidden', !on);
-            leaderboardSection.classList.toggle('lg:col-span-12', !on);
-            leaderboardSection.classList.toggle('lg:col-span-7', on);
 
             adminBadge.classList.toggle('hidden', !on);
             adminBadge.classList.toggle('inline-flex', on);
@@ -536,7 +533,6 @@
         function logout() {
             adminPassword = null;
             clearSession();
-            resetFormState();
             setAdmin(false);
         }
 
@@ -849,7 +845,7 @@
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
             hideFormError();
-            if (!isAdmin || isSubmitting) return;
+            if (isSubmitting) return;
 
             const target = selectedTargetInput.value.trim();
             const rawDigits = amountInput.value.replace(/\D/g, '');
@@ -877,7 +873,6 @@
             try {
                 await api(API, {
                     method: 'POST',
-                    auth: true,
                     body: {
                         target,
                         amount: rawAmount,
@@ -889,11 +884,7 @@
                 showToast(`Sikeresen rögzítve: ${target} (${formatCurrency(rawAmount)})`);
                 await loadHeists();
             } catch (err) {
-                if (err.status === 401) {
-                    handleWriteError(err);
-                } else {
-                    showFormError(err.message);
-                }
+                showFormError(err.message);
             } finally {
                 isSubmitting = false;
                 submitBtn.disabled = false;

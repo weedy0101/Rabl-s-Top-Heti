@@ -34,15 +34,18 @@ await test('üres lista nyilvánosan olvasható, config is jön', async () => {
   assert.equal(data.config.crew.length, 35);
 });
 
-await test('jelszó nélkül nem lehet írni (401)', async () => {
+await test('jelszó nélkül is lehet rablást rögzíteni (201)', async () => {
   const res = await call('/api/heists', { method: 'POST', body: { target: 'Dara Bolt', amount: 1000, solo: true } });
-  assert.equal(res.status, 401);
-  assert.equal(store._size(), 0);
+  assert.equal(res.status, 201);
+  assert.equal(store._size(), 1);
 });
 
-await test('rossz jelszóval nem lehet írni (401)', async () => {
-  const res = await call('/api/heists', { method: 'POST', pw: 'rossz', body: { target: 'Dara Bolt', amount: 1000, solo: true } });
-  assert.equal(res.status, 401);
+await test('jelszó nélkül nem lehet törölni (401), de admin igen', async () => {
+  const id = (await jsonOf(await call('/api/heists'))).heists[0].id;
+  assert.equal((await call('/api/heists/' + id, { method: 'DELETE', pw: 'rossz' })).status, 401);
+  assert.equal((await call('/api/heists', { method: 'DELETE' })).status, 401);
+  assert.equal(store._size(), 1);
+  assert.equal((await call('/api/heists/' + id, { method: 'DELETE', pw: PW })).status, 200);
   assert.equal(store._size(), 0);
 });
 
@@ -56,18 +59,18 @@ await test('login: jó jelszó 200, rossz 401, GET nem engedett', async () => {
 await test('ADMIN_PASSWORD nélkül minden admin művelet 503', async () => {
   const res = await call('/api/login', { method: 'POST', pw: '', password: null });
   assert.equal(res.status, 503);
-  const res2 = await call('/api/heists', { method: 'POST', pw: '', password: '', body: { target: 'Dara Bolt', amount: 1, solo: true } });
+  const res2 = await call('/api/heists/valami', { method: 'DELETE', pw: '', password: '' });
   assert.equal(res2.status, 503);
 });
 
 await test('érvényes rablás rögzítése (társakkal és szólóban)', async () => {
-  const a = await call('/api/heists', { method: 'POST', pw: PW, body: { target: 'Állami Bank', amount: 1250000, solo: false, crew: ['ALFA', 'Bence'] } });
+  const a = await call('/api/heists', { method: 'POST', body: { target: 'Állami Bank', amount: 1250000, solo: false, crew: ['ALFA', 'Bence'] } });
   assert.equal(a.status, 201);
   const heistA = (await jsonOf(a)).heist;
   assert.equal(heistA.crew, 'ALFA, Bence');
   assert.match(heistA.date, /^\d{4}\. \d{2}\. \d{2}\.$/);
 
-  const b = await call('/api/heists', { method: 'POST', pw: PW, body: { target: 'Dara Bolt', amount: 5000000, solo: true, crew: [] } });
+  const b = await call('/api/heists', { method: 'POST', body: { target: 'Dara Bolt', amount: 5000000, solo: true, crew: [] } });
   assert.equal(b.status, 201);
   assert.equal((await jsonOf(b)).heist.crew, 'Egyedül');
 });
@@ -92,7 +95,7 @@ await test('érvénytelen bemenetek elutasítva (400)', async () => {
     { target: 'Dara Bolt', amount: 1000, solo: false, crew: '<script>' },
   ];
   for (const body of bad) {
-    const res = await call('/api/heists', { method: 'POST', pw: PW, body });
+    const res = await call('/api/heists', { method: 'POST', body });
     assert.equal(res.status, 400, JSON.stringify(body));
   }
   assert.equal(store._size(), 2);
