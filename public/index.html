@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="hu" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rablás Heti Top | RP Toplista</title>
+    <!-- Tailwind CSS betöltése -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter és Rajdhani (gaming/RP stílushoz) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome ikonok -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Rajdhani', 'sans-serif'],
+                    },
+                    colors: {
+                        dark: {
+                            950: '#09090b',
+                            900: '#121216',
+                            800: '#1a1a20',
+                            700: '#272730',
+                        },
+                        gold: {
+                            200: '#fde68a',
+                            300: '#fcd34d',
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        },
+                        neon: {
+                            green: '#10b981',
+                            blue: '#38bdf8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-dark-950 text-zinc-100 min-h-screen flex flex-col selection:bg-gold-500 selection:text-dark-950">
+
+    <!-- Háttér dekorációs fényeffektek -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-gold-500/10 rounded-full blur-3xl"></div>
+        <div class="absolute top-1/3 -right-40 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-40 left-1/3 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl"></div>
+    </div>
+
+    <!-- Értesítés (Toast) konténer -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-[60] flex flex-col gap-2"></div>
+
+    <!-- Admin belépés ablak -->
+    <div id="login-modal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+        <div class="w-full max-w-sm bg-dark-900 border border-zinc-800 rounded-2xl p-6 shadow-2xl">
+            <div class="flex items-center gap-2.5 mb-4 pb-4 border-b border-zinc-800">
+                <i class="fa-solid fa-lock text-gold-400 text-lg"></i>
+                <h2 class="font-display text-2xl font-bold uppercase tracking-wide text-white">Admin belépés</h2>
+            </div>
+            <form id="login-form" novalidate>
+                <label for="login-password" class="block text-sm font-medium text-zinc-300 mb-2">Jelszó</label>
+                <input
+                    type="password"
+                    id="login-password"
+                    autocomplete="current-password"
+                    class="w-full bg-dark-950 border border-zinc-700/80 focus:border-gold-400 focus:ring-2 focus:ring-gold-400/20 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-zinc-500 transition outline-none"
+                >
+                <div id="login-error" role="alert" class="hidden mt-3 p-3 rounded-xl bg-rose-950/60 border border-rose-500/40 text-rose-300 text-sm items-start gap-2">
+                    <i class="fa-solid fa-circle-exclamation text-rose-400 mt-0.5 shrink-0"></i>
+                    <span id="login-error-text"></span>
+                </div>
+                <div class="flex gap-2 mt-5">
+                    <button type="button" id="login-cancel" class="flex-1 px-4 py-2.5 rounded-xl border border-zinc-700/80 bg-dark-950 hover:border-zinc-500 text-zinc-300 text-sm font-medium transition cursor-pointer">
+                        Mégse
+                    </button>
+                    <button type="submit" id="login-submit" class="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-gold-500 to-amber-600 hover:from-gold-400 hover:to-amber-500 text-dark-950 font-display font-bold text-base uppercase tracking-wider transition cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
+                        Belépés
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Fő konténer -->
+    <div class="relative z-10 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
+
+        <!-- 1. FEJLÉC ÉS 3 KÁRTYÁS STATISZTIKAI SÁV -->
+        <header class="mb-8 space-y-6">
+            <!-- Cím kártya -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-dark-900/90 backdrop-blur-md border border-zinc-800/80 rounded-2xl p-6 shadow-2xl">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-gold-400 to-amber-600 flex items-center justify-center text-dark-950 shadow-lg shadow-gold-500/20 shrink-0">
+                        <i class="fa-solid fa-sack-dollar text-2xl"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2.5 flex-wrap">
+                            <h1 class="font-display text-3xl sm:text-4xl font-bold tracking-wide uppercase text-white">
+                                Rablás <span class="text-gold-400">Heti Top</span>
+                            </h1>
+                            <span class="px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-full flex items-center gap-1.5">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                Végleges napló
+                            </span>
+                        </div>
+                        <p class="text-zinc-400 text-sm sm:text-base mt-0.5">
+                            Hivatalos heti ranglista, legnagyobb fogások és rablási statisztikák
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2.5 shrink-0">
+                    <span id="admin-badge" class="hidden items-center gap-1.5 px-2.5 py-1 text-xs font-semibold uppercase tracking-wider bg-gold-500/10 text-gold-300 border border-gold-400/40 rounded-full">
+                        <i class="fa-solid fa-user-shield"></i> Admin mód
+                    </span>
+                    <button id="admin-toggle" type="button" class="px-3.5 py-2 rounded-xl border border-zinc-700/80 bg-dark-950 hover:border-gold-400/60 text-zinc-300 text-sm font-medium transition flex items-center gap-2 cursor-pointer">
+                        <i id="admin-toggle-icon" class="fa-solid fa-lock text-gold-400"></i>
+                        <span id="admin-toggle-label">Admin belépés</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3 Kártyás Statisztikai Sáv -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <!-- Összes zsákmány -->
+                <div class="bg-dark-900/90 backdrop-blur-md border border-zinc-800/80 rounded-2xl p-5 shadow-xl flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl shrink-0">
+                        <i class="fa-solid fa-money-bill-trend-up"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="text-xs text-zinc-400 uppercase tracking-wider font-semibold">
+                            Összes zsákmány
+                        </div>
+                        <div id="stat-total-amount" class="font-display text-2xl sm:text-3xl font-bold text-emerald-400 mt-0.5 whitespace-nowrap">
+                            $0
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rablások száma -->
+                <div class="bg-dark-900/90 backdrop-blur-md border border-zinc-800/80 rounded-2xl p-5 shadow-xl flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center text-xl shrink-0">
+                        <i class="fa-solid fa-mask"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="text-xs text-zinc-400 uppercase tracking-wider font-semibold">
+                            Rablások száma
+                        </div>
+                        <div id="stat-total-count" class="font-display text-2xl sm:text-3xl font-bold text-white mt-0.5 whitespace-nowrap">
+                            0 db
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Legnagyobb fogás -->
+                <div class="bg-dark-900/90 backdrop-blur-md border border-zinc-800/80 rounded-2xl p-5 shadow-xl flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-gold-500/10 border border-gold-500/20 text-gold-400 flex items-center justify-center text-xl shrink-0">
+                        <i class="fa-solid fa-crown"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="text-xs text-zinc-400 uppercase tracking-wider font-semibold">
+                            Legnagyobb fogás
+                        </div>
+                        <div id="stat-top-amount" class="font-display text-2xl sm:text-3xl font-bold text-gold-400 mt-0.5 whitespace-nowrap">
+                            $0
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- FŐ TARTALOM -->
+        <main class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+            <!-- BAL OSZLOP: ÚJ RABLÁS RÖGZÍTÉSE (csak adminnak látszik) -->
+            <section id="form-section" class="hidden lg:col-span-5 bg-dark-900/90 backdrop-blur-md border border-zinc-800/80 rounded-2xl p-6 shadow-xl">
+                <div class="flex items-center gap-2.5 mb-5 pb-4 border-b border-zinc-800">
+                    <i class="fa-solid fa-file-signature text-gold-400 text-lg"></i>
+                    <h2 class="font-display text-2xl font-bold uppercase tracking-wide text-white">
+                        Új rablás rögzítése
+                    </h2>
+                </div>
+
+                <!-- Űrlapon belüli hibaüzenet sáv -->
+                <div id="form-error-box" role="alert" class="hidden mb-5 p-3.5 rounded-xl bg-rose-950/60 border border-rose-500/40 text-rose-300 text-sm items-start gap-2.5">
+                    <i class="fa-solid fa-circle-exclamation text-rose-400 mt-0.5 shrink-0"></i>
+                    <span id="form-error-text">Kérlek ellenőrizd a megadott adatokat!</span>
+                </div>
+
+                <form id="heist-form" novalidate class="space-y-5">
+                    <!-- Mit raboltatok? -->
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-300 mb-2">
+                            Mit raboltatok? <span class="text-gold-400">*</span>
+                        </label>
+                        <input type="hidden" id="selected-target" value="">
+                        <div id="target-options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <!-- JavaScript tölti fel a szerver által küldött helyszínekkel -->
+                        </div>
+                    </div>
+
+                    <!-- Mekkora volt a zsákmány? -->
+                    <div>
+                        <label for="amount-input" class="block text-sm font-medium text-zinc-300 mb-2">
+                            Mekkora volt a zsákmány? <span class="text-gold-400">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gold-400 font-display font-bold text-lg">
+                                $
+                            </div>
+                            <input
+                                type="text"
+                                id="amount-input"
+                                inputmode="numeric"
+                                autocomplete="off"
+                                placeholder="pl. 1 250 000"
+                                class="w-full bg-dark-950 border border-zinc-700/80 focus:border-gold-400 focus:ring-2 focus:ring-gold-400/20 rounded-xl pl-8 pr-3.5 py-2.5 text-sm text-white placeholder-zinc-500 transition outline-none"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Kivel raboltatok? -->
+                    <div>
+                        <div class="flex items-center justify-between gap-2 mb-1.5">
+                            <label for="crew-search-input" class="block text-sm font-medium text-zinc-300">
+                                Kivel raboltatok? <span class="text-gold-400">*</span>
+                            </label>
+                            <span id="crew-selected-count" class="text-xs font-medium text-zinc-400">
+                                Nincs kiválasztva
+                            </span>
+                        </div>
+
+                        <!-- Kiválasztott nevek (jelvények / chipek) konténere -->
+                        <div id="selected-crew-chips" class="hidden flex-wrap gap-1.5 mb-2.5 p-2.5 rounded-xl bg-dark-950/90 border border-zinc-800">
+                            <!-- JavaScript tölti fel -->
+                        </div>
+
+                        <!-- Keresőmező és Egyedül (Szóló) gyorsgomb -->
+                        <div class="flex flex-col sm:flex-row gap-2 mb-2">
+                            <div class="relative flex-1">
+                                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
+                                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                                </div>
+                                <input
+                                    type="text"
+                                    id="crew-search-input"
+                                    autocomplete="off"
+                                    placeholder="Keresés név alapján..."
+                                    class="w-full bg-dark-950 border border-zinc-700/80 focus:border-gold-400 focus:ring-2 focus:ring-gold-400/20 rounded-xl pl-9 pr-8 py-2.5 text-sm text-white placeholder-zinc-500 transition outline-none"
+                                >
+                                <button
+                                    type="button"
+                                    id="crew-search-clear"
+                                    title="Keresés törlése"
+                                    aria-label="Keresés törlése"
+                                    class="hidden absolute inset-y-0 right-0 pr-3 items-center text-zinc-500 hover:text-zinc-300 cursor-pointer"
+                                >
+                                    <i class="fa-solid fa-xmark text-xs"></i>
+                                </button>
+                            </div>
+
+                            <button
+                                type="button"
+                                id="solo-option-btn"
+                                class="px-3.5 py-2.5 rounded-xl border border-zinc-700/80 bg-dark-950 hover:border-gold-400/60 text-zinc-300 text-xs sm:text-sm font-medium transition flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+                            >
+                                <i class="fa-solid fa-user-secret text-gold-400"></i>
+                                <span>Egyedül (Szóló)</span>
+                            </button>
+                        </div>
+
+                        <!-- Görgethető választható névlista -->
+                        <div id="crew-options-list" class="max-h-48 overflow-y-auto bg-dark-950 border border-zinc-800 rounded-xl p-2 grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                            <!-- JavaScript tölti fel a szerver által küldött nevekkel -->
+                        </div>
+                    </div>
+
+                    <!-- Beküldés gomb -->
+                    <button
+                        type="submit"
+                        id="submit-btn"
+                        class="w-full mt-2 bg-gradient-to-r from-gold-500 to-amber-600 hover:from-gold-400 hover:to-amber-500 text-dark-950 font-display font-bold text-lg uppercase tracking-wider py-3.5 px-6 rounded-xl shadow-lg shadow-gold-500/20 active:scale-[0.99] transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                        <i class="fa-solid fa-trophy"></i>
+                        Rögzítés a toplistára
+                    </button>
+                </form>
+            </section>
+
+            <!-- JOBB OSZLOP: HETI TOPLISTA (mindenkinek látszik) -->
+            <section id="leaderboard-section" class="lg:col-span-12 bg-dark-900/90 backdrop-blur-md border border-zinc-800/80 rounded-2xl p-6 shadow-xl">
+
+                <div class="flex items-center justify-between gap-4 mb-6 pb-4 border-b border-zinc-800">
+                    <div class="flex items-center gap-2.5">
+                        <i class="fa-solid fa-ranking-star text-gold-400 text-xl"></i>
+                        <h2 class="font-display text-2xl font-bold uppercase tracking-wide text-white">
+                            Heti Toplista
+                        </h2>
+                    </div>
+                    <span id="lock-note" class="text-xs text-zinc-500 flex items-center gap-1.5">
+                        <i class="fa-solid fa-lock text-zinc-600"></i> Rögzített sorrend
+                    </span>
+                    <button id="reset-btn" type="button" class="hidden px-3 py-1.5 rounded-lg border border-rose-500/40 bg-rose-950/40 hover:bg-rose-900/50 text-rose-300 text-xs font-medium transition items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-rotate-left"></i> Új hét (lista nullázása)
+                    </button>
+                </div>
+
+                <!-- Betöltés / hiba állapot -->
+                <div id="loading-state" class="text-center py-14 text-zinc-400 text-sm">
+                    <i class="fa-solid fa-spinner fa-spin mr-2"></i> Toplista betöltése...
+                </div>
+
+                <div id="load-error" role="alert" class="hidden mb-4 p-3.5 rounded-xl bg-rose-950/60 border border-rose-500/40 text-rose-300 text-sm items-start gap-2.5">
+                    <i class="fa-solid fa-circle-exclamation text-rose-400 mt-0.5 shrink-0"></i>
+                    <span id="load-error-text">Nem sikerült betölteni a toplistát.</span>
+                </div>
+
+                <!-- Toplista Kártyák Konténer -->
+                <div id="leaderboard-list" class="space-y-3.5">
+                    <!-- Ide töltődnek be a rablások JavaScriptből -->
+                </div>
+
+                <!-- Üres állapot üzenet -->
+                <div id="empty-state" class="hidden text-center py-14 px-4 border-2 border-dashed border-zinc-800/90 rounded-2xl bg-dark-950/40">
+                    <div class="w-16 h-16 rounded-2xl bg-dark-800/90 border border-zinc-700/60 text-gold-400/80 flex items-center justify-center mx-auto mb-4 text-2xl shadow-inner">
+                        <i class="fa-solid fa-vault"></i>
+                    </div>
+                    <h3 class="font-display text-xl font-bold uppercase tracking-wide text-zinc-200">
+                        Még nincs rögzített rablás ezen a héten
+                    </h3>
+                    <p class="text-sm text-zinc-400 mt-1.5 max-w-md mx-auto">
+                        Az első nagy fogás rögzítése után itt jelenik meg a heti ranglista.
+                    </p>
+                </div>
+
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Lábléc -->
+    <footer class="relative z-10 border-t border-zinc-900 py-5 mt-12 text-center text-xs text-zinc-500">
+        Rablás Heti Top &bull; Az eredményeket csak az admin rögzítheti.
+    </footer>
+
+    <!-- JAVASCRIPT LOGIKA -->
+    <script>
+        const API = '/api/heists';
+        const LOGIN_API = '/api/login';
+        const PW_KEY = 'rablas_admin_pw';
+        const POLL_MS = 30000;
+
+        // Ikonok a helyszínekhez. Ismeretlen helyszínhez alapértelmezett ikon jár.
+        const TARGET_META = {
+            'Állami Bank': { icon: 'fa-landmark', color: 'text-gold-400' },
+            'Paleto Bank': { icon: 'fa-building-columns', color: 'text-sky-400' },
+            'Fleeca Bank': { icon: 'fa-vault', color: 'text-emerald-400' },
+            'Ékszerbolt': { icon: 'fa-gem', color: 'text-purple-400' },
+            'Sima Bolt Rablás': { icon: 'fa-store', color: 'text-zinc-400' },
+            'Tilos Lőni Bolt': { icon: 'fa-ban', color: 'text-rose-400' },
+            'Dara Bolt': { icon: 'fa-shop', color: 'text-orange-400' }
+        };
+        const DEFAULT_META = { icon: 'fa-sack-dollar', color: 'text-gold-400' };
+        const metaFor = (target) => TARGET_META[target] || DEFAULT_META;
+
+        // Állapot
+        let heists = [];
+        let config = { targets: [], crew: [], maxAmount: 999999999, soloLabel: 'Egyedül' };
+        let configKey = '';
+        let adminPassword = null;
+        let isAdmin = false;
+        let selectedCrew = [];
+        let isSoloSelected = false;
+        let isSubmitting = false;
+        let firstLoadDone = false;
+
+        // DOM elemek
+        const $ = (id) => document.getElementById(id);
+        const form = $('heist-form');
+        const formSection = $('form-section');
+        const leaderboardSection = $('leaderboard-section');
+        const selectedTargetInput = $('selected-target');
+        const targetGrid = $('target-options-grid');
+        const amountInput = $('amount-input');
+        const crewSearchInput = $('crew-search-input');
+        const crewSearchClear = $('crew-search-clear');
+        const soloOptionBtn = $('solo-option-btn');
+        const selectedCrewChips = $('selected-crew-chips');
+        const crewSelectedCount = $('crew-selected-count');
+        const crewOptionsList = $('crew-options-list');
+        const leaderboardList = $('leaderboard-list');
+        const emptyState = $('empty-state');
+        const loadingState = $('loading-state');
+        const loadError = $('load-error');
+        const loadErrorText = $('load-error-text');
+        const statTotalCount = $('stat-total-count');
+        const statTotalAmount = $('stat-total-amount');
+        const statTopAmount = $('stat-top-amount');
+        const formErrorBox = $('form-error-box');
+        const formErrorText = $('form-error-text');
+        const toastContainer = $('toast-container');
+        const submitBtn = $('submit-btn');
+        const adminToggle = $('admin-toggle');
+        const adminToggleIcon = $('admin-toggle-icon');
+        const adminToggleLabel = $('admin-toggle-label');
+        const adminBadge = $('admin-badge');
+        const lockNote = $('lock-note');
+        const resetBtn = $('reset-btn');
+        const loginModal = $('login-modal');
+        const loginForm = $('login-form');
+        const loginPassword = $('login-password');
+        const loginError = $('login-error');
+        const loginErrorText = $('login-error-text');
+        const loginSubmit = $('login-submit');
+        const loginCancel = $('login-cancel');
+
+        /* ---------- Segédfüggvények ---------- */
+
+        function escapeHTML(value) {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function formatNumber(num) {
+            return String(Math.round(num)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+        }
+
+        function formatCurrency(num) {
+            return '$' + formatNumber(num);
+        }
+
+        function showFormError(message) {
+            formErrorText.textContent = message;
+            formErrorBox.classList.remove('hidden');
+            formErrorBox.classList.add('flex');
+        }
+
+        function hideFormError() {
+            formErrorBox.classList.add('hidden');
+            formErrorBox.classList.remove('flex');
+        }
+
+        function showToast(message, type = 'success') {
+            const isError = type === 'error';
+            const toast = document.createElement('div');
+            toast.className = 'flex items-center gap-2.5 max-w-sm px-4 py-3 rounded-xl bg-dark-900 border text-sm shadow-2xl transition duration-300 opacity-0 translate-y-2 '
+                + (isError ? 'border-rose-500/40 text-rose-300' : 'border-emerald-500/40 text-emerald-300');
+            toast.setAttribute('role', 'status');
+            toast.innerHTML = `
+                <i class="fa-solid ${isError ? 'fa-circle-exclamation text-rose-400' : 'fa-circle-check text-emerald-400'} shrink-0"></i>
+                <span>${escapeHTML(message)}</span>
+            `;
+            toastContainer.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.remove('opacity-0', 'translate-y-2'));
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        /* ---------- API hívások ---------- */
+
+        class ApiError extends Error {
+            constructor(message, status) {
+                super(message);
+                this.status = status;
+            }
+        }
+
+        async function api(path, { method = 'GET', body, auth = false } = {}) {
+            const headers = {};
+            if (body !== undefined) headers['Content-Type'] = 'application/json';
+            if (auth && adminPassword) headers['Authorization'] = 'Bearer ' + adminPassword;
+
+            let res;
+            try {
+                res = await fetch(path, {
+                    method,
+                    headers,
+                    body: body !== undefined ? JSON.stringify(body) : undefined,
+                    cache: 'no-store'
+                });
+            } catch (err) {
+                throw new ApiError('Nincs kapcsolat a szerverrel.', 0);
+            }
+
+            let data = null;
+            try { data = await res.json(); } catch (err) { /* nem JSON válasz */ }
+
+            if (!res.ok) {
+                throw new ApiError((data && data.error) || `Hiba történt (${res.status}).`, res.status);
+            }
+            return data;
+        }
+
+        /* ---------- Admin állapot ---------- */
+
+        function setAdmin(on) {
+            isAdmin = on;
+            formSection.classList.toggle('hidden', !on);
+            leaderboardSection.classList.toggle('lg:col-span-12', !on);
+            leaderboardSection.classList.toggle('lg:col-span-7', on);
+
+            adminBadge.classList.toggle('hidden', !on);
+            adminBadge.classList.toggle('inline-flex', on);
+            adminToggleLabel.textContent = on ? 'Kilépés' : 'Admin belépés';
+            adminToggleIcon.classList.toggle('fa-lock', !on);
+            adminToggleIcon.classList.toggle('fa-right-from-bracket', on);
+
+            lockNote.classList.toggle('hidden', on);
+            resetBtn.classList.toggle('hidden', !on);
+            resetBtn.classList.toggle('inline-flex', on);
+
+            renderLeaderboard();
+        }
+
+        function saveSession(pw) {
+            try { sessionStorage.setItem(PW_KEY, pw); } catch (err) { /* nincs tároló */ }
+        }
+
+        function clearSession() {
+            try { sessionStorage.removeItem(PW_KEY); } catch (err) { /* nincs tároló */ }
+        }
+
+        function logout() {
+            adminPassword = null;
+            clearSession();
+            resetFormState();
+            setAdmin(false);
+        }
+
+        function handleWriteError(err) {
+            if (err.status === 401) {
+                logout();
+                showToast('A belépés érvénytelen lett, lépj be újra.', 'error');
+            } else {
+                showToast(err.message, 'error');
+            }
+        }
+
+        function openLogin() {
+            loginError.classList.add('hidden');
+            loginError.classList.remove('flex');
+            loginPassword.value = '';
+            loginModal.classList.remove('hidden');
+            loginModal.classList.add('flex');
+            loginPassword.focus();
+        }
+
+        function closeLogin() {
+            loginModal.classList.add('hidden');
+            loginModal.classList.remove('flex');
+            loginPassword.value = '';
+        }
+
+        function showLoginError(message) {
+            loginErrorText.textContent = message;
+            loginError.classList.remove('hidden');
+            loginError.classList.add('flex');
+        }
+
+        adminToggle.addEventListener('click', () => {
+            if (isAdmin) {
+                logout();
+                showToast('Kiléptél az admin módból.');
+            } else {
+                openLogin();
+            }
+        });
+
+        loginCancel.addEventListener('click', closeLogin);
+        loginModal.addEventListener('click', (e) => {
+            if (e.target === loginModal) closeLogin();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !loginModal.classList.contains('hidden')) closeLogin();
+        });
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const pw = loginPassword.value;
+            if (!pw) {
+                showLoginError('Add meg a jelszót.');
+                return;
+            }
+            loginSubmit.disabled = true;
+            adminPassword = pw;
+            try {
+                await api(LOGIN_API, { method: 'POST', auth: true });
+                saveSession(pw);
+                closeLogin();
+                setAdmin(true);
+                showToast('Admin mód bekapcsolva.');
+            } catch (err) {
+                adminPassword = null;
+                showLoginError(err.message);
+                loginPassword.select();
+            } finally {
+                loginSubmit.disabled = false;
+            }
+        });
+
+        /* ---------- Adatok betöltése ---------- */
+
+        async function loadHeists() {
+            try {
+                const data = await api(API);
+                heists = Array.isArray(data.heists) ? data.heists : [];
+                if (data.config) config = data.config;
+
+                const newKey = JSON.stringify([config.targets, config.crew]);
+                if (newKey !== configKey) {
+                    configKey = newKey;
+                    renderTargetButtons();
+                    renderCrewOptionsList(crewSearchInput.value);
+                }
+
+                loadError.classList.add('hidden');
+                loadError.classList.remove('flex');
+                renderApp();
+            } catch (err) {
+                loadErrorText.textContent = firstLoadDone
+                    ? 'A friss adatok betöltése nem sikerült, az utolsó ismert lista látszik.'
+                    : 'Nem sikerült betölteni a toplistát: ' + err.message;
+                loadError.classList.remove('hidden');
+                loadError.classList.add('flex');
+            } finally {
+                firstLoadDone = true;
+                loadingState.classList.add('hidden');
+            }
+        }
+
+        /* ---------- Helyszín kiválasztása ---------- */
+
+        function renderTargetButtons() {
+            targetGrid.innerHTML = '';
+            config.targets.forEach(target => {
+                const meta = metaFor(target);
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.dataset.target = target;
+                btn.setAttribute('aria-pressed', 'false');
+                btn.className = 'target-btn text-left px-3.5 py-2.5 rounded-xl border border-zinc-800 bg-dark-950/80 hover:border-zinc-600 text-zinc-300 text-sm font-medium transition flex items-center gap-2.5 cursor-pointer';
+                btn.innerHTML = `
+                    <i class="fa-solid ${meta.icon} ${meta.color} w-4 text-center"></i>
+                    <span>${escapeHTML(target)}</span>
+                `;
+                btn.addEventListener('click', () => {
+                    hideFormError();
+                    selectTarget(selectedTargetInput.value === target ? '' : target);
+                });
+                targetGrid.appendChild(btn);
+            });
+            selectTarget(config.targets.includes(selectedTargetInput.value) ? selectedTargetInput.value : '');
+        }
+
+        function selectTarget(value) {
+            selectedTargetInput.value = value;
+            document.querySelectorAll('.target-btn').forEach(btn => {
+                const active = btn.dataset.target === value && value !== '';
+                btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+
+                btn.classList.toggle('border-gold-400', active);
+                btn.classList.toggle('bg-gold-500/15', active);
+                btn.classList.toggle('text-white', active);
+                btn.classList.toggle('ring-1', active);
+                btn.classList.toggle('ring-gold-400/50', active);
+
+                btn.classList.toggle('border-zinc-800', !active);
+                btn.classList.toggle('bg-dark-950/80', !active);
+                btn.classList.toggle('text-zinc-300', !active);
+                btn.classList.toggle('hover:border-zinc-600', !active);
+            });
+        }
+
+        // Összeg mező: csak számjegyek, ezres tagolással, felső korláttal
+        amountInput.addEventListener('input', (e) => {
+            hideFormError();
+            const digits = e.target.value.replace(/\D/g, '');
+            let numericValue = digits ? parseInt(digits, 10) : 0;
+            if (numericValue > config.maxAmount) numericValue = config.maxAmount;
+            e.target.value = numericValue > 0 ? formatNumber(numericValue) : '';
+        });
+
+        /* ---------- Társak kiválasztása ---------- */
+
+        function updateCrewSelectionUI() {
+            if (isSoloSelected) {
+                soloOptionBtn.classList.remove('border-zinc-700/80', 'bg-dark-950', 'text-zinc-300');
+                soloOptionBtn.classList.add('border-gold-400', 'bg-gold-500/15', 'text-white', 'ring-1', 'ring-gold-400/50');
+                crewSelectedCount.textContent = 'Egyedül (Szóló)';
+                crewSelectedCount.classList.remove('text-zinc-400');
+                crewSelectedCount.classList.add('text-gold-400');
+            } else {
+                soloOptionBtn.classList.add('border-zinc-700/80', 'bg-dark-950', 'text-zinc-300');
+                soloOptionBtn.classList.remove('border-gold-400', 'bg-gold-500/15', 'text-white', 'ring-1', 'ring-gold-400/50');
+
+                if (selectedCrew.length > 0) {
+                    crewSelectedCount.textContent = `${selectedCrew.length} fő kiválasztva`;
+                    crewSelectedCount.classList.remove('text-zinc-400');
+                    crewSelectedCount.classList.add('text-gold-400');
+                } else {
+                    crewSelectedCount.textContent = 'Nincs kiválasztva';
+                    crewSelectedCount.classList.add('text-zinc-400');
+                    crewSelectedCount.classList.remove('text-gold-400');
+                }
+            }
+
+            selectedCrewChips.innerHTML = '';
+
+            if (isSoloSelected) {
+                selectedCrewChips.classList.remove('hidden');
+                selectedCrewChips.classList.add('flex');
+
+                const soloChip = document.createElement('span');
+                soloChip.className = 'inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-lg bg-gold-500/15 border border-gold-400/50 text-gold-200 text-xs font-medium';
+                soloChip.innerHTML = `
+                    <i class="fa-solid fa-user-secret text-gold-400 text-[11px]"></i>
+                    <span>Egyedül</span>
+                    <button type="button" aria-label="Egyedül opció törlése" class="w-4 h-4 rounded hover:bg-gold-400/20 text-gold-300 hover:text-white flex items-center justify-center transition cursor-pointer">
+                        &times;
+                    </button>
+                `;
+                soloChip.querySelector('button').addEventListener('click', () => {
+                    isSoloSelected = false;
+                    updateCrewSelectionUI();
+                });
+                selectedCrewChips.appendChild(soloChip);
+                return;
+            }
+
+            if (selectedCrew.length === 0) {
+                selectedCrewChips.classList.add('hidden');
+                selectedCrewChips.classList.remove('flex');
+                return;
+            }
+
+            selectedCrewChips.classList.remove('hidden');
+            selectedCrewChips.classList.add('flex');
+
+            selectedCrew.forEach(name => {
+                const chip = document.createElement('span');
+                chip.className = 'inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-lg bg-gold-500/15 border border-gold-400/50 text-gold-200 text-xs font-medium';
+                chip.innerHTML = `
+                    <span>${escapeHTML(name)}</span>
+                    <button type="button" aria-label="${escapeHTML(name)} eltávolítása" class="w-4 h-4 rounded hover:bg-gold-400/20 text-gold-300 hover:text-white flex items-center justify-center transition cursor-pointer">
+                        &times;
+                    </button>
+                `;
+                chip.querySelector('button').addEventListener('click', () => toggleCrewMember(name));
+                selectedCrewChips.appendChild(chip);
+            });
+        }
+
+        function toggleCrewMember(name) {
+            hideFormError();
+            isSoloSelected = false;
+
+            const idx = selectedCrew.indexOf(name);
+            if (idx === -1) {
+                selectedCrew.push(name);
+            } else {
+                selectedCrew.splice(idx, 1);
+            }
+
+            updateCrewSelectionUI();
+            renderCrewOptionsList(crewSearchInput.value);
+        }
+
+        function renderCrewOptionsList(filterText = '') {
+            const query = filterText.trim().toLowerCase();
+
+            crewSearchClear.classList.toggle('hidden', query.length === 0);
+            crewSearchClear.classList.toggle('flex', query.length > 0);
+
+            const names = [...config.crew].sort((a, b) => a.localeCompare(b, 'hu', { sensitivity: 'base' }));
+            const filteredNames = names.filter(name => name.toLowerCase().includes(query));
+
+            crewOptionsList.innerHTML = '';
+
+            if (filteredNames.length === 0) {
+                crewOptionsList.innerHTML = `
+                    <div class="col-span-full py-4 px-3 text-center text-xs text-zinc-500">
+                        Nincs találat erre a névre: "<span class="text-zinc-300">${escapeHTML(filterText)}</span>"
+                    </div>
+                `;
+                return;
+            }
+
+            filteredNames.forEach(name => {
+                const isSelected = selectedCrew.includes(name);
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = isSelected
+                    ? 'flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-gold-400/60 bg-gold-500/15 text-white text-xs sm:text-sm font-medium transition cursor-pointer text-left'
+                    : 'flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-zinc-800/90 bg-dark-900/70 hover:border-zinc-600 text-zinc-300 text-xs sm:text-sm transition cursor-pointer text-left';
+
+                btn.innerHTML = `
+                    <span class="truncate">${escapeHTML(name)}</span>
+                    <span class="w-4 h-4 rounded flex items-center justify-center shrink-0 text-[10px] ${isSelected ? 'bg-gold-400 text-dark-950 font-bold' : 'border border-zinc-700 text-transparent'}">
+                        <i class="fa-solid fa-check"></i>
+                    </span>
+                `;
+                btn.addEventListener('click', () => toggleCrewMember(name));
+                crewOptionsList.appendChild(btn);
+            });
+        }
+
+        crewSearchInput.addEventListener('input', (e) => renderCrewOptionsList(e.target.value));
+
+        crewSearchClear.addEventListener('click', () => {
+            crewSearchInput.value = '';
+            renderCrewOptionsList('');
+            crewSearchInput.focus();
+        });
+
+        soloOptionBtn.addEventListener('click', () => {
+            hideFormError();
+            selectedCrew = [];
+            isSoloSelected = !isSoloSelected;
+            updateCrewSelectionUI();
+            renderCrewOptionsList(crewSearchInput.value);
+        });
+
+        function resetFormState() {
+            form.reset();
+            selectTarget('');
+            selectedCrew = [];
+            isSoloSelected = false;
+            crewSearchInput.value = '';
+            hideFormError();
+            updateCrewSelectionUI();
+            renderCrewOptionsList('');
+        }
+
+        /* ---------- Új rablás beküldése ---------- */
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            hideFormError();
+            if (!isAdmin || isSubmitting) return;
+
+            const target = selectedTargetInput.value.trim();
+            const rawDigits = amountInput.value.replace(/\D/g, '');
+            const rawAmount = rawDigits ? parseInt(rawDigits, 10) : 0;
+
+            if (!target || !config.targets.includes(target)) {
+                showFormError('Kérlek válassz ki egy rablási helyszínt a fenti listából!');
+                return;
+            }
+
+            if (isNaN(rawAmount) || rawAmount <= 0 || rawAmount > config.maxAmount) {
+                showFormError('Kérlek adj meg egy érvényes összeget ($1 és $999 999 999 között)!');
+                amountInput.focus();
+                return;
+            }
+
+            if (!isSoloSelected && selectedCrew.length === 0) {
+                showFormError('Kérlek válassz ki legalább egy társat a listából, vagy válaszd az Egyedül opciót!');
+                crewSearchInput.focus();
+                return;
+            }
+
+            isSubmitting = true;
+            submitBtn.disabled = true;
+            try {
+                await api(API, {
+                    method: 'POST',
+                    auth: true,
+                    body: {
+                        target,
+                        amount: rawAmount,
+                        solo: isSoloSelected,
+                        crew: isSoloSelected ? [] : selectedCrew
+                    }
+                });
+                resetFormState();
+                showToast(`Sikeresen rögzítve: ${target} (${formatCurrency(rawAmount)})`);
+                await loadHeists();
+            } catch (err) {
+                if (err.status === 401) {
+                    handleWriteError(err);
+                } else {
+                    showFormError(err.message);
+                }
+            } finally {
+                isSubmitting = false;
+                submitBtn.disabled = false;
+            }
+        });
+
+        /* ---------- Törlés és új hét (csak admin) ---------- */
+
+        leaderboardList.addEventListener('click', async (e) => {
+            const btn = e.target.closest('[data-delete-id]');
+            if (!btn || !isAdmin) return;
+
+            const id = btn.dataset.deleteId;
+            const heist = heists.find(h => h.id === id);
+            const label = heist ? `${heist.target} – ${formatCurrency(heist.amount)}` : 'ezt a rablást';
+            if (!confirm(`Biztosan törlöd? ${label}`)) return;
+
+            try {
+                await api(`${API}/${encodeURIComponent(id)}`, { method: 'DELETE', auth: true });
+                showToast('A rablás törölve.');
+                await loadHeists();
+            } catch (err) {
+                handleWriteError(err);
+            }
+        });
+
+        resetBtn.addEventListener('click', async () => {
+            if (!isAdmin) return;
+            if (heists.length === 0) {
+                showToast('A lista már üres.', 'error');
+                return;
+            }
+            if (!confirm('Biztosan törlöd az ÖSSZES rablást a heti listáról? Ez nem vonható vissza.')) return;
+            if (!confirm(`Utolsó megerősítés: ${heists.length} rablás törlődik. Folytatod?`)) return;
+
+            try {
+                await api(API, { method: 'DELETE', auth: true });
+                showToast('A heti lista nullázva.');
+                await loadHeists();
+            } catch (err) {
+                handleWriteError(err);
+            }
+        });
+
+        /* ---------- Megjelenítés ---------- */
+
+        function getRankStyle(index) {
+            if (index === 0) {
+                return {
+                    card: 'border-gold-400/60 bg-gradient-to-r from-gold-500/15 to-dark-950/60 shadow-lg shadow-gold-500/10',
+                    badge: 'bg-gradient-to-br from-gold-400 to-amber-600 text-dark-950',
+                    amount: 'text-gold-400',
+                    content: '<i class="fa-solid fa-crown"></i>'
+                };
+            }
+            if (index === 1) {
+                return {
+                    card: 'border-zinc-400/40 bg-gradient-to-r from-zinc-300/10 to-dark-950/60',
+                    badge: 'bg-gradient-to-br from-zinc-200 to-zinc-400 text-dark-950',
+                    amount: 'text-zinc-200',
+                    content: '2'
+                };
+            }
+            if (index === 2) {
+                return {
+                    card: 'border-orange-500/40 bg-gradient-to-r from-orange-500/10 to-dark-950/60',
+                    badge: 'bg-gradient-to-br from-orange-400 to-orange-700 text-dark-950',
+                    amount: 'text-orange-300',
+                    content: '3'
+                };
+            }
+            return {
+                card: 'border-zinc-800/90 bg-dark-950/60',
+                badge: 'bg-dark-800 border border-zinc-700/60 text-zinc-400',
+                amount: 'text-emerald-400',
+                content: String(index + 1)
+            };
+        }
+
+        function renderStats() {
+            const total = heists.reduce((sum, h) => sum + h.amount, 0);
+            const top = heists.reduce((max, h) => Math.max(max, h.amount), 0);
+
+            statTotalAmount.textContent = formatCurrency(total);
+            statTotalCount.textContent = `${heists.length} db`;
+            statTopAmount.textContent = formatCurrency(top);
+        }
+
+        function renderLeaderboard() {
+            leaderboardList.innerHTML = '';
+
+            if (!firstLoadDone) return;
+
+            if (heists.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            emptyState.classList.add('hidden');
+
+            // Összeg szerint csökkenő; egyenlőség esetén a korábbi áll előrébb
+            const ranked = heists
+                .map((h, order) => ({ h, order }))
+                .sort((a, b) => b.h.amount - a.h.amount || a.order - b.order)
+                .map(entry => entry.h);
+
+            ranked.forEach((heist, index) => {
+                const style = getRankStyle(index);
+                const meta = metaFor(heist.target);
+
+                const card = document.createElement('article');
+                card.className = `flex items-center gap-4 p-4 rounded-2xl border ${style.card}`;
+                card.innerHTML = `
+                    <div class="w-11 h-11 rounded-xl flex items-center justify-center font-display text-xl font-bold shrink-0 ${style.badge}">
+                        ${style.content}
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <i class="fa-solid ${meta.icon} ${meta.color} text-sm"></i>
+                            <h3 class="font-display text-lg font-bold uppercase tracking-wide text-white truncate">${escapeHTML(heist.target)}</h3>
+                        </div>
+                        <div class="mt-1 flex items-start gap-1.5 text-xs text-zinc-400">
+                            <i class="fa-solid fa-user-group mt-0.5 shrink-0"></i>
+                            <span class="break-words min-w-0">${escapeHTML(heist.crew)}</span>
+                        </div>
+                        <div class="mt-0.5 flex items-center gap-1.5 text-xs text-zinc-500">
+                            <i class="fa-regular fa-calendar"></i>
+                            <span>${escapeHTML(heist.date || '')}</span>
+                        </div>
+                    </div>
+                    <div class="font-display text-xl sm:text-2xl font-bold whitespace-nowrap ${style.amount}">
+                        ${formatCurrency(heist.amount)}
+                    </div>
+                    ${isAdmin ? `
+                    <button type="button" data-delete-id="${escapeHTML(heist.id)}" title="Rablás törlése" aria-label="Rablás törlése"
+                        class="w-8 h-8 rounded-lg border border-zinc-700/80 hover:border-rose-500/60 hover:bg-rose-950/40 text-zinc-500 hover:text-rose-300 flex items-center justify-center shrink-0 transition cursor-pointer">
+                        <i class="fa-solid fa-trash text-xs"></i>
+                    </button>` : ''}
+                `;
+                leaderboardList.appendChild(card);
+            });
+        }
+
+        function renderApp() {
+            renderStats();
+            renderLeaderboard();
+        }
+
+        /* ---------- Indítás ---------- */
+
+        async function restoreSession() {
+            let saved = null;
+            try { saved = sessionStorage.getItem(PW_KEY); } catch (err) { /* nincs tároló */ }
+            if (!saved) return;
+
+            adminPassword = saved;
+            try {
+                await api(LOGIN_API, { method: 'POST', auth: true });
+                setAdmin(true);
+            } catch (err) {
+                adminPassword = null;
+                if (err.status === 401) clearSession();
+            }
+        }
+
+        async function init() {
+            updateCrewSelectionUI();
+            await Promise.all([loadHeists(), restoreSession()]);
+            renderLeaderboard();
+
+            // Rendszeres frissítés, hogy a nézők is lássák az új rablásokat
+            setInterval(() => {
+                if (!document.hidden && !isSubmitting) loadHeists();
+            }, POLL_MS);
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
