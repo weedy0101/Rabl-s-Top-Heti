@@ -106,7 +106,7 @@ export async function handleRequest(req, { store, adminPassword }) {
       return denied || json({ ok: true });
     }
 
-    // --- Lista (nyilvános), hozzáadás, teljes nullázás ---
+    // --- Lista és hozzáadás (nyilvános), teljes nullázás (csak admin) ---
     if (path === '/api/heists') {
       if (method === 'GET') {
         const heists = await readAllHeists(store);
@@ -121,10 +121,8 @@ export async function handleRequest(req, { store, adminPassword }) {
         });
       }
 
+      // Új rablást bárki rögzíthet, jelszó nélkül. A szerver minden adatot ellenőriz.
       if (method === 'POST') {
-        const denied = await requireAdmin(req, adminPassword);
-        if (denied) return denied;
-
         let body;
         try {
           body = await readJsonBody(req);

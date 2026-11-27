@@ -1,12 +1,12 @@
 # Rablás Heti Top – Netlify változat
 
-Mindenki látja a heti toplistát, de **csak te szerkesztheted** (jelszóval). Az adatok a Netlify saját tárhelyén (Netlify Blobs) tárolódnak, így minden eszközön ugyanaz a lista látszik.
+Mindenki látja a heti toplistát, és **bárki rögzíthet új rablást**, de **törölni csak te tudsz** (jelszóval, admin módban). Az adatok a Netlify saját tárhelyén (Netlify Blobs) tárolódnak, így minden eszközön ugyanaz a lista látszik.
 
 ## Hogyan működik
 
-- **Nézők:** megnyitják az oldalt, és csak a listát és a statisztikákat látják. Az oldal 30 másodpercenként magától frissül.
-- **Te (admin):** a jobb felső **Admin belépés** gombbal belépsz a jelszavaddal. Ekkor megjelenik az új rablás űrlapja, a kártyákon a törlés gomb, és az **Új hét (lista nullázása)** gomb.
-- **Biztonság:** a jelszót a szerver ellenőrzi (`ADMIN_PASSWORD` környezeti változó), nem szerepel a weboldal kódjában. A szerver minden beküldött adatot újra ellenőriz, és jelszó nélkül egyetlen írási kérést sem fogad el.
+- **Bárki:** megnyitja az oldalt, látja a listát és a statisztikákat, és az űrlappal jelszó nélkül rögzíthet új rablást. Az oldal 30 másodpercenként magától frissül.
+- **Te (admin):** a jobb felső **Admin belépés** gombbal belépsz a jelszavaddal. Ekkor megjelenik a kártyákon a törlés gomb és az **Új hét (lista nullázása)** gomb.
+- **Biztonság:** a jelszót a szerver ellenőrzi (`ADMIN_PASSWORD` környezeti változó), nem szerepel a weboldal kódjában. A szerver minden beküldött adatot újra ellenőriz (csak a listában szereplő helyszín, név és érvényes összeg fogadható el), törlést pedig jelszó nélkül nem fogad el.
 
 ## Kitelepítés Netlify-ra (GitHubról)
 
