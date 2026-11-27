@@ -1,0 +1,12 @@
+[build]
+  # Nincs fordítási lépés, de a függvénynek kell a @netlify/blobs csomag,
+  # ezért a függőségeket mindig telepítjük, mielőtt a függvény becsomagolódik.
+  command = "npm ci"
+  publish = "public"
+
+  [build.environment]
+    NODE_VERSION = "22"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
